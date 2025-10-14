@@ -1,3 +1,4 @@
+
 class Menu(tk.Toplevel):
     """Fenêtre de sélection de la difficulté."""
     def __init__(self, parent, engine):
