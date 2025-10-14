@@ -2,14 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 class Menu(tk.Toplevel):
-    """
-    Fenêtre de sélection de la difficulté.
-    Indépendante, réutilisable dans n'importe quel projet Tkinter.
 
-    Paramètres :
-    - parent : la fenêtre principale (Tk ou Frame)
-    - on_difficulty_selected : fonction callback appelée avec (level, settings)
-    """
 
     def __init__(self, parent, on_difficulty_selected):
         super().__init__(parent)
