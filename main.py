@@ -7,6 +7,9 @@
 from tkinter import * 
 from bricks import Brick #les briques à casser
 from racket import Racket #la raquette pour casser les briques 
+#from menu import Menu # le menu qui permet de choisir sa difficulté. 
+#from ball import Ball # la balle
+
 
 #Variables utiles
 
@@ -51,5 +54,7 @@ class Game :
         self.__frame2.pack (side='right', padx=10, pady=10)
         Button(self.__frame1, text= 'Start', fg = 'Green').pack(padx=10, pady=10)
         Button(self.__frame2, text='Stop',command = self.stopgame, fg = 'Red').pack(padx=10, pady=20)
+
+  
 
 Game()
