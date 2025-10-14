@@ -1,6 +1,45 @@
 import tkinter as tk
 import random
 
+class Ball:
+    def init(self, canvas, x, y, size, dx, dy, color="purple"):
+        self.canvas = canvas
+        self.size = size
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.id = self.canvas.create_circle(
+            self.x, self.y,
+            self.x + self.size, self.y+self.size,
+            fill=color
+        )
+    
+    def move(self):
+        self.x += self.dx
+        self.y += self.dy
+        self.canvas.coords(
+            self.id,
+            self.x, self.y,
+            self.x + self.size, self.y + self.size
+        )
+    def bounce_horizontal(self):
+        self.dx = -self.dx
+
+    def bounce_vertical(self):
+        self.dy = -self.dy
+    def reset(self, x, y, dx, dy):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.canvas.coords(
+            self.id,
+            self.x, self.y,
+            self.x + self.size, self.y + self.size
+        )
+
+
 class Brick:
     def __init__(self, canvas, x, y, width, height, color):
         self.canvas = canvas
@@ -45,6 +84,8 @@ class Game:
         self.window.bind("<Left>", self.move_paddle_left)
         self.window.bind("<Right>", self.move_paddle_right)
 
+        self.ball = Ball(self.canvas, 300, 300, 15, 5, -5)
+
     def create_bricks(self):
         # Example: 5 rows, 10 columns
         rows = 5
@@ -80,6 +121,18 @@ class Game:
                 self.paddle_x, self.paddle_y,
                 self.paddle_x + self.paddle_width, self.paddle_y+ self.paddle_height
             )
+
+    def move_ball(self):
+        #bounce off left/right wall
+        if self.ball.x <= 0 or self.ball.x + self.ball.size >= 600:
+            self.ball.bounce_horizontal()
+        #bounce off top 
+        if self.ball.y <= 0:
+            self.ball.bounce_vertical()
+        #bounce of paddle
+        if self.ball.y + self.ball.size >= self.paddle_y:
+            if(self.paddle_x < self.ball.x + self.ball.size and self.ball.x < self.paddle_x):
+
 
     def update_text(self):
         self.canvas.itemconfig(self.score_text, text=f"Score: {self.score}")
