@@ -1,32 +1,78 @@
+import tkinter as tk
+from tkinter import ttk
 
 class Menu(tk.Toplevel):
-    """Fenêtre de sélection de la difficulté."""
-    def __init__(self, parent, engine):
+    """
+    Fenêtre de sélection de la difficulté.
+    Indépendante, réutilisable dans n'importe quel projet Tkinter.
+
+    Paramètres :
+    - parent : la fenêtre principale (Tk ou Frame)
+    - on_difficulty_selected : fonction callback appelée avec (level, settings)
+    """
+
+    def __init__(self, parent, on_difficulty_selected):
         super().__init__(parent)
-        self.title("Menu — Difficulté")
-        self.geometry("300x250")
+        self.title("Menu — Sélection de la difficulté")
+        self.geometry("320x260")
         self.resizable(False, False)
-        self.engine = engine
+        self.on_difficulty_selected = on_difficulty_selected
         self._build_widgets()
 
     def _build_widgets(self):
-        ttk.Label(self, text="Sélectionnez la difficulté :", font=("TkDefaultFont", 12, "bold")).pack(pady=20)
+        """Construit l’interface du menu."""
+        ttk.Label(
+            self,
+            text="Choisissez un niveau de difficulté :",
+            font=("TkDefaultFont", 12, "bold")
+        ).pack(pady=20)
 
-        ttk.Button(self, text="Facile", command=lambda: self._set_difficulty("facile")).pack(pady=10)
-        ttk.Button(self, text="Moyen", command=lambda: self._set_difficulty("moyen")).pack(pady=10)
-        ttk.Button(self, text="Difficile", command=lambda: self._set_difficulty("difficile")).pack(pady=10)
+        ttk.Button(
+            self,
+            text="Facile",
+            command=lambda: self._select_difficulty("facile")
+        ).pack(pady=10)
 
-    def _set_difficulty(self, level: str):
-        """Applique les paramètres selon la difficulté choisie."""
+        ttk.Button(
+            self,
+            text="Moyen",
+            command=lambda: self._select_difficulty("moyen")
+        ).pack(pady=10)
+
+        ttk.Button(
+            self,
+            text="Difficile",
+            command=lambda: self._select_difficulty("difficile")
+        ).pack(pady=10)
+
+    def _select_difficulty(self, level: str):
+        """Définit les paramètres du niveau choisi et notifie le parent."""
+        settings = {}
+
         if level == "facile":
-            self.engine.BRICK_ROWS = 1
-            self.engine.paddle_width_ratio = 1.0
+            settings = {
+                "rows": 2,
+                "cols": 6,
+                "paddle_ratio": 1.0,
+                "ball_speed": 5
+            }
         elif level == "moyen":
-            self.engine.BRICK_ROWS = 2
-            self.engine.paddle_width_ratio = 0.8
-        else:
-            self.engine.BRICK_ROWS = 3
-            self.engine.paddle_width_ratio = 0.6
+            settings = {
+                "rows": 4,
+                "cols": 8,
+                "paddle_ratio": 0.8,
+                "ball_speed": 6
+            }
+        elif level == "difficile":
+            settings = {
+                "rows": 6,
+                "cols": 10,
+                "paddle_ratio": 0.6,
+                "ball_speed": 7
+            }
 
-        self.engine._queue_message(f"Difficulté : {level.capitalize()} sélectionnée")
+        # Appelle le callback si défini
+        if callable(self.on_difficulty_selected):
+            self.on_difficulty_selected(level, settings)
+
         self.destroy()

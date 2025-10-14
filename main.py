@@ -5,6 +5,7 @@
 ''''Importation des bibliothèques'''
 
 from tkinter import * 
+import random
 from bricks import Brick #les briques à casser
 from racket import Racket #la raquette pour casser les briques 
 #from menu import Menu # le menu qui permet de choisir sa difficulté. 
@@ -37,6 +38,44 @@ class Game :
         self.__lines = 3
         self.__score_text = self.__canvas.create_text(10, 10, anchor="nw", fill="white", font=("Arial", 16), text=f"Score:{self.__score}")
         self.run_game()
+
+        def move_ball(self):
+            self.ball.move()
+        #bounce off left/right wall
+            if self.ball.x <= 0 or self.ball.x + self.ball.size >= 600:
+                self.ball.bounce_horizontal()
+        #bounce off top 
+            if self.ball.y <= 0:
+                self.ball.bounce_vertical()
+        #bounce of paddle
+            if self.ball.y + self.ball.size >= self.paddle_y:
+                if(self.paddle_x < self.ball.x + self.ball.size and self.ball.x < self.paddle_x + self.paddle_width):
+                    self.ball.bounce_vertical()
+                    self.ball.y = self.paddle_y - self.ball.size
+
+        #if ball falls out, you lose one life
+            if self.ball.y + self.ball.size > 500:
+                self.lives -= 1
+                self.update_text()
+                self.ball.reset(300, 300, random.choice([-5, 5]), -5)
+
+        #bounce off bricks
+            hit_brick = None
+            for brick in self.bricks:
+                brick_coords = self.canvas.coords(brick.id)
+                bx1, by1, bx2, by2 = brick_coords
+                ball_center_x = self.ball.x + self.ball.size/2
+                ball_center_y = self.ball.y + self.ball.size/2
+                if bx1 < ball_center_x < bx2 and by1 < ball_center_y < by2:
+                    hit_brick = brick
+                    break
+            if hit_brick:
+                self.canvas.delete(hit_brick.id)
+                self.bricks.remove(hit_brick)
+                self.ball.bounce_vertical()
+                self.score += 10
+                self.update_text()
+
 
     def run_game(self):
         self.__fenetre.mainloop()
