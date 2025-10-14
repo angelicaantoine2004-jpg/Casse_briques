@@ -60,7 +60,7 @@ class Game :
             self.ball.reset(300, 300, random.choice([-5, 5]), -5)
 
         #bounce off bricks
-         hit_brick = None
+        hit_brick = None
         for brick in self.bricks:
             brick_coords = self.canvas.coords(brick.id)
             bx1, by1, bx2, by2 = brick_coords
