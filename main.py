@@ -36,6 +36,8 @@ class Game :
         
         self.__score = 0
         self.__lines = 3
+        self.game_over_text_id = None
+        self.win_text_id = None
         self.__score_text = self.__canvas.create_text(10, 10, anchor="nw", fill="white", font=("Arial", 16), text=f"Score:{self.__score}")
         self.run_game()
 
@@ -57,6 +59,11 @@ class Game :
         if self.ball.y + self.ball.size > 500:
             self.lives -= 1
             self.update_text()
+            if self.lives <=0:
+                self.running = False
+                if self.game_over_text_id is None:
+                    self.game_over_text_id = self.canvas.create_text(300,250, text= "game over", fill="white", font=("arial", 32))
+                return
             self.ball.reset(300, 300, random.choice([-5, 5]), -5)
 
         #bounce off bricks
@@ -75,6 +82,10 @@ class Game :
             self.ball.bounce_vertical()
             self.score += 10
             self.update_text()
+            if not self.bricks:
+                self.running = False
+                if self.win_text_id is None:
+                    self.win_text_id = self.canvas.create_text(300, 250, text="congratulations! you beat the game :D", fill="yellow", font=("Arial", 28), justify="center")
 
 
     def run_game(self):

@@ -55,6 +55,8 @@ class Game:
 
         self.score = 0
         self.lives = 3 
+        self.game_over_text_id = None
+        self.win_text_id = None
         self.score_text = self.canvas.create_text(10, 10, anchor="nw", fill="white", font=("Arial", 16), text=f"Score:{self.score}")
         self.lives_text = self.canvas.create_text(590, 10, anchor="ne", fill="white", font=("Arial", 16), text=f"Lives:{self.lives}")
 
@@ -140,6 +142,11 @@ class Game:
         if self.ball.y + self.ball.size > 500:
             self.lives -= 1
             self.update_text()
+            if self.lives <=0:
+                self.running = False
+                if self.game_over_text_id is None:
+                    self.game_over_text_id = self.canvas.create_text(300,250, text= "game over", fill="white", font=("arial", 32))
+                return
             self.ball.reset(300, 300, random.choice([-5, 5]), -5)
 
         #bounce off bricks
@@ -158,6 +165,10 @@ class Game:
             self.ball.bounce_vertical()
             self.score += 10
             self.update_text()
+            if not self.bricks:
+                self.running = False
+                if self.win_text_id is None:
+                    self.win_text_id = self.canvas.create_text(300, 250, text="congratulations! you beat the game :D", fill="yellow", font=("Arial", 28), justify="center")
 
     def update_text(self):
         self.canvas.itemconfig(self.score_text, text=f"Score: {self.score}")
@@ -179,6 +190,20 @@ class Game:
             self.stop_button.config(state=tk.DISABLED)
 
     def start_game(self):
+        if self.game_over_text_id is not None:
+            self.canvas.delete(self.game_over_text_id)
+            self.game_over_text_id = None
+        if self.win_text_id is not None:
+            self.canvas.delete(self.win_text_id)
+            self.win_text_id = None
+        self.score = 0
+        self.lives = 3
+        self.update_text()
+        self.ball.reset(300, 300, 5, -5)
+        for brick in self.bricks:
+            self.canvas.delete(brick.id)
+        self.bricks = []
+        self.create_bricks()
         if not self.running:
             self.run_game()
     
