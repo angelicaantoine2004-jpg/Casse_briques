@@ -47,21 +47,21 @@ class Menu(tk.Toplevel):
                 "rows": 2,
                 "cols": 6,
                 "paddle_ratio": 1.0,
-                "ball_speed": 5
+                "ball_speed": 4
             }
         elif level == "moyen":
             settings = {
                 "rows": 4,
                 "cols": 8,
                 "paddle_ratio": 0.8,
-                "ball_speed": 6
+                "ball_speed": 5
             }
         elif level == "difficile":
             settings = {
                 "rows": 6,
                 "cols": 10,
                 "paddle_ratio": 0.6,
-                "ball_speed": 7
+                "ball_speed": 6
             }
 
         # Appelle le callback si défini

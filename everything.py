@@ -86,7 +86,7 @@ class Game:
         self.window.bind("<Left>", self.move_paddle_left)
         self.window.bind("<Right>", self.move_paddle_right)
 
-        self.ball = Ball(self.canvas, 300, 300, 15, 5, -5)
+        self.ball = Ball(self.canvas, 300, 300, 15, 4, -4)
 
     def create_bricks(self):
         # Example: 5 rows, 10 columns
@@ -199,7 +199,7 @@ class Game:
         self.score = 0
         self.lives = 3
         self.update_text()
-        self.ball.reset(300, 300, 5, -5)
+        self.ball.reset(300, 300, 4, -4)
         for brick in self.bricks:
             self.canvas.delete(brick.id)
         self.bricks = []
