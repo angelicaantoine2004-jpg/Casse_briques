@@ -37,7 +37,8 @@ class Game:
         # Bricks
         self.bricks = []
         self.create_bricks()
-
+        
+        # Add the racket and the ball
         self.racket = Racket(self.canvas, self.window)
         self.Ball = Ball(self.canvas, 300, 300, 15, 4, -4)
 
@@ -61,6 +62,7 @@ class Game:
                 brick = Brick(self.canvas, x, y, brick_width, brick_height, color)
                 self.bricks.append(brick)
 
+        #definition of the movement of the racket
     def move_paddle_left(self, event=None):
         if self.racket.paddle_x > 0:
             self.racket.paddle_x = max(0, self.racket.paddle_x - self.racket.paddle_speed)
@@ -96,7 +98,7 @@ class Game:
         if self.Ball.y + self.Ball.size > 500:
             self.lives -= 1
             self.update_text()
-            if self.lives <=0:
+            if self.lives <=0: # if amount of lives <= 0 you lost the game
                 self.running = False
                 if self.game_over_text_id is None:
                     self.game_over_text_id = self.canvas.create_text(300,250, text= "game over", fill="white", font=("arial", 32))
@@ -115,22 +117,22 @@ class Game:
                 break
         if hit_brick:
             self.canvas.delete(hit_brick.id)
-            self.bricks.remove(hit_brick)
+            self.bricks.remove(hit_brick) #delete the brick that was hit
             self.Ball.bounce_vertical()
             self.score += 10
             self.update_text()
-            if not self.bricks:
+            if not self.bricks: #if there are no more bricks left, then you won
                 self.running = False
                 if self.win_text_id is None:
-                    self.win_text_id = self.canvas.create_text(300, 250, text="congratulations! you beat the game :D", fill="yellow", font=("Arial", 28), justify="center")
+                    self.win_text_id = self.canvas.create_text(300, 250, text="congratulations you beat the game :D", fill="yellow", font=("Arial", 28), justify="center")
 
     def update_text(self):
         self.canvas.itemconfig(self.score_text, text=f"Score: {self.score}")
         self.canvas.itemconfig(self.lives_text, text=f"Lives: {self.lives}")
 
     def run_game(self):
-        self.running = True
-        self.start_button.config(state=tk.DISABLED)
+        self.running = True # the game is set to run on it s own after start
+        self.start_button.config(state=tk.DISABLED) #the start button is disabled until the stop button is pressed
         self.stop_button.config(state=tk.NORMAL)
         self.game_loop()
 
@@ -138,22 +140,22 @@ class Game:
         if self.running:
             self.move_ball()
             self.update_text()
-            self.window.after(15, self.game_loop)
+            self.window.after(15, self.game_loop) # we want the ball to move automatically, and the score to be updated every 15 ms
         else:
             self.start_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.DISABLED)
 
     def start_game(self):
-        if self.game_over_text_id is not None:
+        if self.game_over_text_id is not None: # we dont want the "game over" or "congrats" text on the screen if we restart the game 
             self.canvas.delete(self.game_over_text_id)
             self.game_over_text_id = None
-        if self.win_text_id is not None:
+        if self.win_text_id is not None: 
             self.canvas.delete(self.win_text_id)
             self.win_text_id = None
         self.score = 0
         self.lives = 3
         self.update_text()
-        self.Ball.reset(300, 300, 4, -4)
+        self.Ball.reset(300, 300, 4, -4) #coords of reset ball
         for brick in self.bricks:
             self.canvas.delete(brick.id)
         self.bricks = []
