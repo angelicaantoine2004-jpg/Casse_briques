@@ -10,49 +10,108 @@ from bricks import Brick #les briques à casser
 from racket import Racket #la raquette pour casser les briques 
 #from menu import Menu # le menu qui permet de choisir sa difficulté. 
 from ball import Ball # la balle
+from menu import Menu
+
 
 
 class Game:
-    def __init__(self):  
+    def __init__(self, rows=None, paddle_width=None, ball_speed=None):
         self.window = tk.Tk()
         self.window.title("Casse-brique")
         self.canvas = tk.Canvas(self.window, width=600, height=500, bg="black")
         self.canvas.pack()
 
+        self.rows = rows if rows is not None else 5
+        self.paddle_width = paddle_width if paddle_width is not None else 100
+        self.ball_speed = ball_speed if ball_speed is not None else 4
+        self.difficulty_selected = False 
+
         self.score = 0
         self.lives = 3 
         self.game_over_text_id = None
         self.win_text_id = None
-        self.score_text = self.canvas.create_text(10, 10, anchor="nw", fill="white", font=("Arial", 16), text=f"Score:{self.score}")
-        self.lives_text = self.canvas.create_text(590, 10, anchor="ne", fill="white", font=("Arial", 16), text=f"Lives:{self.lives}")
+        self.score_text = self.canvas.create_text(
+            10, 10, anchor="nw", fill="white", font=("Arial", 16),
+            text=f"Score:{self.score}"
+        )
+        self.lives_text = self.canvas.create_text(
+            590, 10, anchor="ne", fill="white", font=("Arial", 16),
+            text=f"Lives:{self.lives}"
+        )
 
-        # Add start button 
-        self.start_button = tk.Button(self.window, text="Start", font=("Arial", 14), command=self.start_game)
-        self.start_button.pack(pady=20)
-        # Add stop button
-        self.stop_button = tk.Button(self.window, text="Stop", font=("Arial",14), command=self.stop_game, state=tk.DISABLED)
-        self.stop_button.pack(pady=20)
+        self.button_frame = tk.Frame(self.window, bg="black")
+        self.button_frame.pack(pady=10)
+
+        self.start_button = tk.Button(
+            self.button_frame, text="Start", font=("Arial", 14),
+            command=self.start_game, state=tk.DISABLED
+        )
+        self.start_button.grid(row=0, column=0, padx=10)
+
+        self.menu_button = tk.Button(
+            self.button_frame, text="Menu", font=("Arial", 14),
+            command=self.open_menu
+        )
+        self.menu_button.grid(row=0, column=1, padx=10)
+
+
+        self.stop_button = tk.Button(
+            self.button_frame, text="Quit", font=("Arial", 14),
+            command=self.stop_game
+        )
+        self.stop_button.grid(row=0, column=2, padx=10)
+
         self.running = False
 
-        # Bricks
+        self.bricks = []
+
+
+        self.racket = Racket(self.canvas, self.window)
+        self.racket.paddle_width = self.paddle_width
+        self.canvas.coords(
+            self.racket.paddle,
+            self.racket.paddle_x, self.racket.paddle_y,
+            self.racket.paddle_x + self.racket.paddle_width,
+            self.racket.paddle_y + self.racket.paddle_height
+        )
+
+        self.Ball = Ball(self.canvas, 300, 300, 15, self.ball_speed, -self.ball_speed)
+
+
+
+    def open_menu(self):
+        Menu(self.window, self.set_difficulty)
+
+    def set_difficulty(self, rows, paddle_width, ball_speed):
+        self.rows = rows
+        self.paddle_width = paddle_width
+        self.ball_speed = ball_speed
+        self.difficulty_selected = True
+
+        self.start_button.config(state=tk.NORMAL)  
+
+        for brick in self.bricks:
+            self.canvas.delete(brick.id)
         self.bricks = []
         self.create_bricks()
-        
-        # Add the racket and the ball
-        self.racket = Racket(self.canvas, self.window)
-        self.Ball = Ball(self.canvas, 300, 300, 15, 4, -4)
+
+        self.racket.paddle_width = self.paddle_width
+        self.canvas.coords(
+            self.racket.paddle,
+            self.racket.paddle_x, self.racket.paddle_y,
+            self.racket.paddle_x + self.racket.paddle_width, self.racket.paddle_y + self.racket.paddle_height
+        )
 
 
     def create_bricks(self):
-        # Example: 5 rows, 10 columns
-        rows = 5
+        rows = self.rows
         cols = 10
         brick_width = 55
         brick_height = 20
         padding = 5
         offset_x = 10
         offset_y = 40
-        colors = ["red", "orange", "yellow", "green", "blue"]
+        colors = ["red", "orange", "yellow", "green", "blue", "purple", "pink", "cyan"]
 
         for row in range(rows):
             for col in range(cols):
@@ -62,7 +121,7 @@ class Game:
                 brick = Brick(self.canvas, x, y, brick_width, brick_height, color)
                 self.bricks.append(brick)
 
-        #definition of the movement of the racket
+            #definition of the movement of the racket
     def move_paddle_left(self, event=None):
         if self.racket.paddle_x > 0:
             self.racket.paddle_x = max(0, self.racket.paddle_x - self.racket.paddle_speed)
@@ -146,27 +205,48 @@ class Game:
             self.stop_button.config(state=tk.DISABLED)
 
     def start_game(self):
-        if self.game_over_text_id is not None: # we dont want the "game over" or "congrats" text on the screen if we restart the game 
+        if not self.difficulty_selected:
+            self.canvas.create_text(
+                300, 250,
+                text="Choose a difficulty from the Menu !",
+                fill="yellow", font=("Arial", 16)
+            )
+            return
+
+        if self.ball_speed is None:
+            self.ball_speed = 4
+        if self.rows is None:
+            self.rows = 5
+        if self.paddle_width is None:
+            self.paddle_width = 100
+
+        if self.game_over_text_id is not None:
             self.canvas.delete(self.game_over_text_id)
             self.game_over_text_id = None
-        if self.win_text_id is not None: 
+        if self.win_text_id is not None:
             self.canvas.delete(self.win_text_id)
             self.win_text_id = None
+
         self.score = 0
         self.lives = 3
         self.update_text()
-        self.Ball.reset(300, 300, 4, -4) #coords of reset ball
-        for brick in self.bricks:
-            self.canvas.delete(brick.id)
-        self.bricks = []
-        self.create_bricks()
-        if not self.running:
-            self.run_game()
+
+        self.Ball.reset(300, 300, self.ball_speed, -abs(self.ball_speed))
+
+        self.run_game()
+
+
+
     
     def stop_game(self):
         self.running = False
         self.window.destroy()
 
+
 if __name__ == "__main__":
-    game = Game()
-    game.window.mainloop()
+    def start_game(rows, paddle_width, ball_speed):
+        game = Game(rows, paddle_width, ball_speed)
+        game.window.mainloop()
+
+    app = Game()
+    app.window.mainloop()
